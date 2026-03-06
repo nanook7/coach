@@ -166,6 +166,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 1rem;
     }
 
@@ -486,6 +487,30 @@
       font-size: 0.875rem;
       color: var(--text-muted);
       border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive ───────────────────────── */
+    @media (max-width: 600px) {
+      main {
+        padding: 1.5rem 0 3rem;
+      }
+
+      .section-card {
+        padding: 1.25rem;
+      }
+
+      .stat-card {
+        padding: 1rem 1.25rem;
+      }
+
+      .avail-section {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .filter-row {
+        width: 100%;
+      }
     }
   </style>
 </head>

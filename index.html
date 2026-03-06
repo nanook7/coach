@@ -120,7 +120,7 @@
       gap: 1rem;
     }
 
-    nav { display: flex; gap: 1.5rem; }
+    nav { display: flex; flex-wrap: wrap; gap: 1.5rem; }
     nav a { font-size: 0.95rem; }
 
     /* Hero */
@@ -357,6 +357,37 @@
       font-size: 0.875rem;
       margin-top: 0.75rem;
       min-height: 1.2em;
+    }
+
+    /* ── Responsive ───────────────────────── */
+    @media (max-width: 600px) {
+      .hero {
+        padding: 2.5rem 0 3rem;
+      }
+
+      section {
+        padding: 2.5rem 0;
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+      }
+
+      .contact-links {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      nav {
+        gap: 0.85rem;
+      }
+
+      nav a {
+        font-size: 0.875rem;
+      }
     }
   </style>
 </head>
