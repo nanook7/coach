@@ -68,6 +68,26 @@
       color: var(--text);
     }
 
+    .logo-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .admin-link {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .admin-link:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
     nav { display: flex; gap: 1.5rem; }
     nav a { font-size: 0.95rem; }
 
@@ -308,7 +328,10 @@
 <body>
   <header>
     <div class="container header-inner">
-      <a href="index.html" class="logo">Coach</a>
+      <div class="logo-group">
+        <a href="index.html" class="logo">Coach</a>
+        <a href="/admin.html" class="admin-link">Admin</a>
+      </div>
       <nav>
         <a href="index.html#about">About</a>
         <a href="index.html#tours">Tours</a>
