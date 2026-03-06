@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tour Calendar & Booking — Coach</title>
+  <meta name="description" content="See when underground military tours are available and book your visit with Coach." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --text: #1a1a1a;
+      --text-muted: #5c5c5c;
+      --accent: #c45c3e;
+      --accent-soft: #e8b4a8;
+      --card: #fff;
+      --border: #e8e4df;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    h1, h2, h3 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    h1 { font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 0.5rem; }
+    h2 { font-size: clamp(1.5rem, 2.5vw, 1.875rem); margin: 0 0 1rem; }
+    h3 { font-size: 1.125rem; margin: 0 0 0.5rem; }
+
+    p { margin: 0 0 1rem; color: var(--text-muted); }
+    a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+
+    header {
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    nav { display: flex; gap: 1.5rem; }
+    nav a { font-size: 0.95rem; }
+
+    main { padding: 3rem 0 4rem; }
+
+    .page-intro {
+      margin-bottom: 2.5rem;
+    }
+
+    .page-intro .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Calendar */
+    .calendar-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .calendar-header h2 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .calendar-nav button {
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .calendar-nav button:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .calendar-grid .day-name {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 0.5rem 0;
+    }
+
+    .calendar-grid .day-cell {
+      aspect-ratio: 1;
+      max-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      cursor: default;
+    }
+
+    .calendar-grid .day-cell.empty {
+      visibility: hidden;
+    }
+
+    .calendar-grid .day-cell.available {
+      background: var(--accent-soft);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .calendar-grid .day-cell.available:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .calendar-grid .day-cell.selected {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .calendar-grid .day-cell.past {
+      color: var(--border);
+    }
+
+    /* Time slots */
+    .times-section {
+      display: none;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .times-section.visible { display: block; }
+
+    .times-section h3 { margin-bottom: 0.75rem; }
+
+    .time-slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .time-slot {
+      padding: 0.5rem 1rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .time-slot:hover {
+      border-color: var(--accent-soft);
+    }
+
+    .time-slot.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    /* Booking form */
+    .booking-section {
+      display: none;
+      margin-top: 2rem;
+      padding: 1.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .booking-section.visible { display: block; }
+
+    .booking-section h2 { margin-bottom: 1rem; }
+
+    .form-row {
+      margin-bottom: 1rem;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .form-row input,
+    .form-row textarea {
+      width: 100%;
+      max-width: 400px;
+      padding: 0.65rem 0.85rem;
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card);
+    }
+
+    .form-row textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-row .readonly {
+      background: var(--border);
+      color: var(--text-muted);
+      cursor: default;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 1.75rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn:hover {
+      background: #a84a30;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    footer {
+      padding: 2rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Coach</a>
+      <nav>
+        <a href="index.html#about">About</a>
+        <a href="index.html#tours">Tours</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="page-intro">
+        <p class="section-label">Tours</p>
+        <h1>Tour calendar & booking</h1>
+        <p>Choose a date to see available times, then complete the form to request your tour. We’ll confirm by email.</p>
+      </div>
+
+      <div class="calendar-wrap">
+        <div class="calendar-header">
+          <h2 id="calendar-title">March 2025</h2>
+          <div class="calendar-nav">
+            <button type="button" id="prev-month" aria-label="Previous month">←</button>
+            <button type="button" id="next-month" aria-label="Next month">→</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid" id="calendar-grid"></div>
+
+        <div class="times-section" id="times-section">
+          <h3>Available times on <span id="selected-date-label"></span></h3>
+          <div class="time-slots" id="time-slots"></div>
+        </div>
+      </div>
+
+      <div class="booking-section" id="booking-section">
+        <h2>Request this tour</h2>
+        <form id="booking-form" action="mailto:hello@example.com" method="get" target="_blank">
+          <input type="hidden" name="subject" id="form-subject" value="Tour booking request" />
+          <input type="hidden" name="body" id="form-body" value="" />
+
+          <div class="form-row">
+            <label for="book-date">Date</label>
+            <input type="text" id="book-date" name="date" class="readonly" readonly />
+          </div>
+          <div class="form-row">
+            <label for="book-time">Time</label>
+            <input type="text" id="book-time" name="time" class="readonly" readonly />
+          </div>
+          <div class="form-row">
+            <label for="book-name">Your name *</label>
+            <input type="text" id="book-name" name="name" required placeholder="Full name" />
+          </div>
+          <div class="form-row">
+            <label for="book-email">Email *</label>
+            <input type="email" id="book-email" name="email" required placeholder="you@example.com" />
+          </div>
+          <div class="form-row">
+            <label for="book-party">Group size</label>
+            <input type="text" id="book-party" name="party" placeholder="e.g. 2 adults, 1 child" />
+          </div>
+          <div class="form-row">
+            <label for="book-notes">Notes</label>
+            <textarea id="book-notes" name="notes" placeholder="Any questions or special requests…"></textarea>
+          </div>
+          <button type="submit" class="btn">Send booking request</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© <span id="year"></span> Coach. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      const BOOKING_EMAIL = 'hello@example.com';
+
+      // Sample availability: weekends + some weekdays. Edit these to match real availability.
+      const DEFAULT_TIMES = ['10:00', '14:00'];
+      const AVAILABLE_WEEKDAYS = [0, 5, 6]; // Sun, Fri, Sat
+
+      function isDateAvailable(date) {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (d < today) return false;
+        return AVAILABLE_WEEKDAYS.includes(d.getDay());
+      }
+
+      function getMonthName(date) {
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+
+      function formatDateForDisplay(date) {
+        return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      }
+
+      function formatDateForForm(date) {
+        return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+
+      let state = {
+        current: new Date(),
+        selectedDate: null,
+        selectedTime: null
+      };
+
+      function renderCalendar() {
+        const year = state.current.getFullYear();
+        const month = state.current.getMonth();
+        const first = new Date(year, month, 1);
+        const last = new Date(year, month + 1, 0);
+        const startPad = first.getDay();
+        const daysInMonth = last.getDate();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        document.getElementById('calendar-title').textContent = getMonthName(state.current);
+
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let html = dayNames.map(d => `<span class="day-name">${d}</span>`).join('');
+
+        for (let i = 0; i < startPad; i++) {
+          html += '<span class="day-cell empty"></span>';
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const d = new Date(year, month, day);
+          d.setHours(0, 0, 0, 0);
+          const isPast = d < today;
+          const available = !isPast && isDateAvailable(d);
+          const selected = state.selectedDate && state.selectedDate.getTime() === d.getTime();
+          let cls = 'day-cell';
+          if (isPast) cls += ' past';
+          else if (available) cls += ' available';
+          if (selected) cls += ' selected';
+          const label = d.getDate();
+          html += `<button type="button" class="${cls}" data-date="${d.toISOString().slice(0,10)}" ${!available ? 'disabled' : ''}>${label}</button>`;
+        }
+
+        const grid = document.getElementById('calendar-grid');
+        grid.innerHTML = html;
+
+        grid.querySelectorAll('.day-cell.available').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const dateStr = this.getAttribute('data-date');
+            const date = new Date(dateStr + 'T12:00:00');
+            selectDate(date);
+          });
+        });
+      }
+
+      function selectDate(date) {
+        state.selectedDate = date;
+        state.selectedTime = null;
+        renderCalendar();
+        document.getElementById('times-section').classList.add('visible');
+        document.getElementById('selected-date-label').textContent = formatDateForDisplay(date);
+
+        const slots = DEFAULT_TIMES.map(t => `<button type="button" class="time-slot" data-time="${t}">${t}</button>`).join('');
+        const container = document.getElementById('time-slots');
+        container.innerHTML = slots;
+        container.querySelectorAll('.time-slot').forEach(btn => {
+          btn.addEventListener('click', function() {
+            container.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            state.selectedTime = this.getAttribute('data-time');
+            showBookingForm();
+          });
+        });
+
+        document.getElementById('booking-section').classList.remove('visible');
+        document.getElementById('book-date').value = formatDateForForm(date);
+        document.getElementById('book-time').value = '';
+      }
+
+      function showBookingForm() {
+        document.getElementById('booking-section').classList.add('visible');
+        document.getElementById('book-time').value = state.selectedTime || '';
+        document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function buildMailtoBody() {
+        const parts = [
+          'Tour booking request',
+          '',
+          'Date: ' + (state.selectedDate ? formatDateForForm(state.selectedDate) : ''),
+          'Time: ' + (state.selectedTime || ''),
+          'Name: ' + (document.getElementById('book-name').value || ''),
+          'Email: ' + (document.getElementById('book-email').value || ''),
+          'Group size: ' + (document.getElementById('book-party').value || ''),
+          '',
+          'Notes:',
+          document.getElementById('book-notes').value || '(none)'
+        ];
+        return parts.join('\n');
+      }
+
+      document.getElementById('prev-month').addEventListener('click', function() {
+        state.current.setMonth(state.current.getMonth() - 1);
+        state.selectedDate = null;
+        state.selectedTime = null;
+        document.getElementById('times-section').classList.remove('visible');
+        document.getElementById('booking-section').classList.remove('visible');
+        renderCalendar();
+      });
+
+      document.getElementById('next-month').addEventListener('click', function() {
+        state.current.setMonth(state.current.getMonth() + 1);
+        state.selectedDate = null;
+        state.selectedTime = null;
+        document.getElementById('times-section').classList.remove('visible');
+        document.getElementById('booking-section').classList.remove('visible');
+        renderCalendar();
+      });
+
+      document.getElementById('booking-form').addEventListener('submit', function(e) {
+        if (!state.selectedDate || !state.selectedTime) {
+          e.preventDefault();
+          return;
+        }
+        document.getElementById('form-subject').value = 'Tour booking: ' + formatDateForForm(state.selectedDate) + ' at ' + state.selectedTime;
+        document.getElementById('form-body').value = buildMailtoBody();
+      });
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+      renderCalendar();
+    })();
+  </script>
+</body>
+</html>

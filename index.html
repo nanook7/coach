@@ -3,10 +3,330 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coach Website</title>
+  <title>Coach — RC-135 EW Legend & Underground Military Tours</title>
+  <meta name="description" content="Coach: legendary electronic warfare officer from the RC-135. Now leading tours of old military buildings underground." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --text: #1a1a1a;
+      --text-muted: #5c5c5c;
+      --accent: #c45c3e;
+      --accent-soft: #e8b4a8;
+      --card: #fff;
+      --border: #e8e4df;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    h1, h2, h3 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      margin: 0 0 0.75em;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      margin: 0 0 1.5rem;
+      color: var(--text);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      margin: 0 0 1rem;
+      color: var(--text-muted);
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Header */
+    header {
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    nav { display: flex; gap: 1.5rem; }
+    nav a { font-size: 0.95rem; }
+
+    /* Hero */
+    .hero {
+      padding: 4rem 0 5rem;
+      text-align: center;
+    }
+
+    .hero .tagline {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 32ch;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 1.75rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 6px;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn:hover {
+      background: #a84a30;
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* Sections */
+    section {
+      padding: 4rem 0;
+    }
+
+    section:nth-child(even) {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    /* About */
+    .about p {
+      max-width: 60ch;
+    }
+
+    /* Services */
+    .services-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .service-card {
+      padding: 1.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .service-card:hover {
+      border-color: var(--accent-soft);
+      box-shadow: 0 4px 20px rgba(196, 92, 62, 0.08);
+    }
+
+    .service-card h3 {
+      color: var(--text);
+    }
+
+    .service-card p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+    }
+
+    /* Contact */
+    .contact p {
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .contact-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Footer */
+    footer {
+      padding: 2rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--text-muted);
+    }
+
+    footer a:hover {
+      color: var(--accent);
+    }
+  </style>
 </head>
 <body>
-  <h1>Coach Website</h1>
-  <p>Your site is ready to deploy on Vercel. Replace this with your content.</p>
+  <header>
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Coach</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#tours">Tours</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <p class="tagline">RC-135 · Electronic Warfare</p>
+        <h1>From the cockpit to underground—stories and tours that bring history to life</h1>
+        <p>Coach: a legendary EW officer from the RC-135. Now he leads tours through old military buildings underground. History, firsthand.</p>
+        <a href="calendar.html" class="btn">Book a tour</a>
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="container">
+        <p class="section-label">About Coach</p>
+        <h2>Legendary electronic warfare on the RC-135—now sharing the world below</h2>
+        <p>“Coach” earned his name as a legendary electronic warfare officer on the RC-135, where he spent years in the mission that defined a generation of airborne reconnaissance. That same eye for detail and love of the mission now drives something different: bringing people into the hidden world of old military infrastructure.</p>
+        <p>He gives tours of historic military buildings underground—spaces most people never see. You get the stories, the context, and a guide who’s lived the culture and knows what these places meant when they were in use.</p>
+      </div>
+    </section>
+
+    <section class="services" id="tours">
+      <div class="container">
+        <p class="section-label">Tours</p>
+        <h2>Underground military building tours</h2>
+        <div class="services-grid">
+          <div class="service-card">
+            <h3>Underground facility tours</h3>
+            <p>Walk through old military buildings below ground with a guide who knows the history and the mission. See what’s left, hear how it was used, and why it mattered.</p>
+          </div>
+          <div class="service-card">
+            <h3>Small groups & individuals</h3>
+            <p>Tours are kept small so you can ask questions and really see the spaces. Whether you’re former military, a history buff, or just curious, you’re in good hands.</p>
+          </div>
+          <div class="service-card">
+            <h3>Stories from the RC-135</h3>
+            <p>When the tour goes there, Coach shares firsthand experience from the RC-135 and electronic warfare—the kind of context you won’t get from a placard.</p>
+          </div>
+        </div>
+        <p style="margin-top: 2rem;">
+          <a href="calendar.html" class="btn btn-outline">Request a tour</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="container">
+        <p class="section-label">Contact</p>
+        <h2>Book a tour</h2>
+        <p>Interested in touring old military buildings underground? Get in touch to ask about dates, group size, and what to expect.</p>
+        <a href="mailto:hello@example.com" class="btn">Email to book a tour</a>
+        <div class="contact-links">
+          <a href="mailto:hello@example.com">hello@example.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© <span id="year"></span> Coach. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
