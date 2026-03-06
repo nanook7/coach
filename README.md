@@ -40,7 +40,7 @@ Static site ready to deploy on Vercel.
 
 ## Project layout
 
-- `index.html` – main page (replace with your content)
+- `index.html` – main page (replace with your content) d
 - `vercel.json` – SPA-style rewrites so all routes serve `index.html`
 - `.gitignore` – ignores `.vercel`, `node_modules`, env files
 
