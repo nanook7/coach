@@ -345,35 +345,33 @@
 
       <div class="booking-section" id="booking-section">
         <h2>Request this tour</h2>
-        <form id="booking-form" action="mailto:hello@example.com" method="get" target="_blank">
-          <input type="hidden" name="subject" id="form-subject" value="Tour booking request" />
-          <input type="hidden" name="body" id="form-body" value="" />
-
+        <form id="booking-form" novalidate>
           <div class="form-row">
             <label for="book-date">Date</label>
-            <input type="text" id="book-date" name="date" class="readonly" readonly />
+            <input type="text" id="book-date" class="readonly" readonly />
           </div>
           <div class="form-row">
             <label for="book-time">Time</label>
-            <input type="text" id="book-time" name="time" class="readonly" readonly />
+            <input type="text" id="book-time" class="readonly" readonly />
           </div>
           <div class="form-row">
             <label for="book-name">Your name *</label>
-            <input type="text" id="book-name" name="name" required placeholder="Full name" />
+            <input type="text" id="book-name" required placeholder="Full name" />
           </div>
           <div class="form-row">
             <label for="book-email">Email *</label>
-            <input type="email" id="book-email" name="email" required placeholder="you@example.com" />
+            <input type="email" id="book-email" required placeholder="you@example.com" />
           </div>
           <div class="form-row">
             <label for="book-party">Group size</label>
-            <input type="text" id="book-party" name="party" placeholder="e.g. 2 adults, 1 child" />
+            <input type="text" id="book-party" placeholder="e.g. 2 adults, 1 child" />
           </div>
           <div class="form-row">
             <label for="book-notes">Notes</label>
-            <textarea id="book-notes" name="notes" placeholder="Any questions or special requests…"></textarea>
+            <textarea id="book-notes" placeholder="Any questions or special requests…"></textarea>
           </div>
-          <button type="submit" class="btn">Send booking request</button>
+          <button type="submit" class="btn" id="submit-btn">Send booking request</button>
+          <p id="booking-status" role="alert" aria-live="polite" style="margin-top:1rem;font-weight:500;"></p>
         </form>
       </div>
     </div>
@@ -386,12 +384,16 @@
   </footer>
 
   <script>
-    (function() {
-      const BOOKING_EMAIL = 'hello@example.com';
+    (function () {
+      /* Redirect to the gate if this session hasn't been unlocked */
+      if (sessionStorage.getItem('tours-unlocked') !== '1') {
+        window.location.replace('index.html');
+        return;
+      }
 
-      // Sample availability: weekends + some weekdays. Edit these to match real availability.
-      const DEFAULT_TIMES = ['10:00', '14:00'];
-      const AVAILABLE_WEEKDAYS = [0, 5, 6]; // Sun, Fri, Sat
+      /* Defaults used while API loads or if it is unavailable */
+      let DEFAULT_TIMES      = ['10:00', '14:00'];
+      let AVAILABLE_WEEKDAYS = [0, 5, 6]; // Sun, Fri, Sat
 
       function isDateAvailable(date) {
         const d = new Date(date);
@@ -414,18 +416,14 @@
         return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       }
 
-      let state = {
-        current: new Date(),
-        selectedDate: null,
-        selectedTime: null
-      };
+      let state = { current: new Date(), selectedDate: null, selectedTime: null };
 
       function renderCalendar() {
-        const year = state.current.getFullYear();
+        const year  = state.current.getFullYear();
         const month = state.current.getMonth();
         const first = new Date(year, month, 1);
-        const last = new Date(year, month + 1, 0);
-        const startPad = first.getDay();
+        const last  = new Date(year, month + 1, 0);
+        const startPad   = first.getDay();
         const daysInMonth = last.getDate();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -435,32 +433,27 @@
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         let html = dayNames.map(d => `<span class="day-name">${d}</span>`).join('');
 
-        for (let i = 0; i < startPad; i++) {
-          html += '<span class="day-cell empty"></span>';
-        }
+        for (let i = 0; i < startPad; i++) html += '<span class="day-cell empty"></span>';
 
         for (let day = 1; day <= daysInMonth; day++) {
           const d = new Date(year, month, day);
           d.setHours(0, 0, 0, 0);
-          const isPast = d < today;
+          const isPast    = d < today;
           const available = !isPast && isDateAvailable(d);
-          const selected = state.selectedDate && state.selectedDate.getTime() === d.getTime();
+          const selected  = state.selectedDate && state.selectedDate.getTime() === d.getTime();
           let cls = 'day-cell';
-          if (isPast) cls += ' past';
+          if (isPast)      cls += ' past';
           else if (available) cls += ' available';
-          if (selected) cls += ' selected';
-          const label = d.getDate();
-          html += `<button type="button" class="${cls}" data-date="${d.toISOString().slice(0,10)}" ${!available ? 'disabled' : ''}>${label}</button>`;
+          if (selected)    cls += ' selected';
+          html += `<button type="button" class="${cls}" data-date="${d.toISOString().slice(0, 10)}" ${!available ? 'disabled' : ''}>${day}</button>`;
         }
 
         const grid = document.getElementById('calendar-grid');
         grid.innerHTML = html;
 
-        grid.querySelectorAll('.day-cell.available').forEach(btn => {
-          btn.addEventListener('click', function() {
-            const dateStr = this.getAttribute('data-date');
-            const date = new Date(dateStr + 'T12:00:00');
-            selectDate(date);
+        grid.querySelectorAll('.day-cell.available').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            selectDate(new Date(this.getAttribute('data-date') + 'T12:00:00'));
           });
         });
       }
@@ -472,12 +465,14 @@
         document.getElementById('times-section').classList.add('visible');
         document.getElementById('selected-date-label').textContent = formatDateForDisplay(date);
 
-        const slots = DEFAULT_TIMES.map(t => `<button type="button" class="time-slot" data-time="${t}">${t}</button>`).join('');
         const container = document.getElementById('time-slots');
-        container.innerHTML = slots;
-        container.querySelectorAll('.time-slot').forEach(btn => {
-          btn.addEventListener('click', function() {
-            container.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
+        container.innerHTML = DEFAULT_TIMES.map(t =>
+          `<button type="button" class="time-slot" data-time="${t}">${t}</button>`
+        ).join('');
+
+        container.querySelectorAll('.time-slot').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            container.querySelectorAll('.time-slot').forEach(function (b) { b.classList.remove('selected'); });
             this.classList.add('selected');
             state.selectedTime = this.getAttribute('data-time');
             showBookingForm();
@@ -495,23 +490,7 @@
         document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
 
-      function buildMailtoBody() {
-        const parts = [
-          'Tour booking request',
-          '',
-          'Date: ' + (state.selectedDate ? formatDateForForm(state.selectedDate) : ''),
-          'Time: ' + (state.selectedTime || ''),
-          'Name: ' + (document.getElementById('book-name').value || ''),
-          'Email: ' + (document.getElementById('book-email').value || ''),
-          'Group size: ' + (document.getElementById('book-party').value || ''),
-          '',
-          'Notes:',
-          document.getElementById('book-notes').value || '(none)'
-        ];
-        return parts.join('\n');
-      }
-
-      document.getElementById('prev-month').addEventListener('click', function() {
+      document.getElementById('prev-month').addEventListener('click', function () {
         state.current.setMonth(state.current.getMonth() - 1);
         state.selectedDate = null;
         state.selectedTime = null;
@@ -520,7 +499,7 @@
         renderCalendar();
       });
 
-      document.getElementById('next-month').addEventListener('click', function() {
+      document.getElementById('next-month').addEventListener('click', function () {
         state.current.setMonth(state.current.getMonth() + 1);
         state.selectedDate = null;
         state.selectedTime = null;
@@ -529,17 +508,73 @@
         renderCalendar();
       });
 
-      document.getElementById('booking-form').addEventListener('submit', function(e) {
-        if (!state.selectedDate || !state.selectedTime) {
-          e.preventDefault();
+      document.getElementById('booking-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!state.selectedDate || !state.selectedTime) return;
+
+        const name  = document.getElementById('book-name').value.trim();
+        const email = document.getElementById('book-email').value.trim();
+        if (!name || !email) {
+          setStatus('Please fill in your name and email.', 'error');
           return;
         }
-        document.getElementById('form-subject').value = 'Tour booking: ' + formatDateForForm(state.selectedDate) + ' at ' + state.selectedTime;
-        document.getElementById('form-body').value = buildMailtoBody();
+
+        const submitBtn = document.getElementById('submit-btn');
+        const origText  = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+        setStatus('', '');
+
+        try {
+          const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              email,
+              date:       state.selectedDate.toISOString().slice(0, 10),
+              time:       state.selectedTime,
+              group_size: document.getElementById('book-party').value.trim() || null,
+              notes:      document.getElementById('book-notes').value.trim()  || null,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setStatus('Booking request sent! We\'ll confirm by email.', 'success');
+            document.getElementById('booking-form').reset();
+            document.getElementById('book-date').value = formatDateForForm(state.selectedDate);
+            document.getElementById('book-time').value = state.selectedTime;
+          } else {
+            setStatus(data.error || 'Something went wrong. Please try again.', 'error');
+          }
+        } catch (_) {
+          setStatus('Network error. Please try again.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origText;
+        }
       });
 
+      function setStatus(msg, type) {
+        var el = document.getElementById('booking-status');
+        el.textContent = msg;
+        el.style.color = type === 'success' ? '#166534' : type === 'error' ? '#b91c1c' : '';
+      }
+
+      async function loadAvailability() {
+        try {
+          const res = await fetch('/api/availability');
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.weekdays) && data.weekdays.length) AVAILABLE_WEEKDAYS = data.weekdays;
+            if (Array.isArray(data.times)    && data.times.length)    DEFAULT_TIMES      = data.times;
+          }
+        } catch (_) { /* use defaults */ }
+        renderCalendar();
+      }
+
       document.getElementById('year').textContent = new Date().getFullYear();
-      renderCalendar();
+      loadAvailability();
     })();
   </script>
 </body>

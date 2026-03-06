@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/calendar.html", "destination": "/calendar.html" },
+    { "source": "/admin.html", "destination": "/admin.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+

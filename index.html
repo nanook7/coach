@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet" />
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <style>
     :root {
       --bg: #faf8f5;
@@ -248,9 +249,127 @@
     footer a:hover {
       color: var(--accent);
     }
+
+    /* ── Gate overlay ─────────────────────────── */
+    #gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      transition: opacity 0.45s ease;
+    }
+
+    #gate-overlay.gate-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .gate-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(26, 26, 26, 0.08);
+    }
+
+    .gate-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .gate-title {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(2.75rem, 7vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+    }
+
+    .gate-sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+
+    #gate-pw {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--bg);
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    #gate-pw:focus {
+      border-color: var(--accent);
+    }
+
+    .gate-captcha-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .gate-btn {
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+
+    #gate-error {
+      color: #b91c1c;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      min-height: 1.2em;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Tours gate overlay — hidden once password + captcha are verified -->
+  <div id="gate-overlay">
+    <div class="gate-card">
+      <p class="gate-eyebrow">RC-135 · Underground Military</p>
+      <h1 class="gate-title">Tours</h1>
+      <p class="gate-sub">Enter the access password to continue.</p>
+      <form id="gate-form" novalidate>
+        <input
+          id="gate-pw"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          aria-label="Password"
+        />
+        <div class="gate-captcha-wrap">
+          <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
+        </div>
+        <button type="submit" class="btn gate-btn">Unlock</button>
+        <p id="gate-error" role="alert" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
   <header>
     <div class="container header-inner">
       <a href="index.html" class="logo">Coach</a>
@@ -327,6 +446,61 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    (function () {
+      /* SHA-256 hash of the access password (never stored in plain text) */
+      var HASH = 'da92248cbde47ce1a647de9bc77663325cd12bf40b907ed8c3660e48c9026879';
+
+      async function sha256(str) {
+        var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(function (b) {
+          return b.toString(16).padStart(2, '0');
+        }).join('');
+      }
+
+      var overlay = document.getElementById('gate-overlay');
+      var form    = document.getElementById('gate-form');
+      var pwInput = document.getElementById('gate-pw');
+      var errorEl = document.getElementById('gate-error');
+
+      function unlock() {
+        overlay.classList.add('gate-hidden');
+        overlay.addEventListener('transitionend', function () {
+          overlay.style.display = 'none';
+        }, { once: true });
+      }
+
+      /* Skip the gate if the session is already unlocked */
+      if (sessionStorage.getItem('tours-unlocked') === '1') {
+        overlay.style.display = 'none';
+        return;
+      }
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        errorEl.textContent = '';
+
+        var captcha = (window.hcaptcha && hcaptcha.getResponse()) || '';
+        if (!captcha) {
+          errorEl.textContent = 'Please complete the CAPTCHA first.';
+          return;
+        }
+
+        var hash = await sha256(pwInput.value);
+        if (hash !== HASH) {
+          errorEl.textContent = 'Incorrect password. Please try again.';
+          pwInput.value = '';
+          pwInput.focus();
+          hcaptcha.reset();
+          return;
+        }
+
+        sessionStorage.setItem('tours-unlocked', '1');
+        unlock();
+      });
+    })();
   </script>
 </body>
 </html>
